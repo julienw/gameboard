@@ -16,11 +16,15 @@
   background-repeat: no-repeat;
 }
 
+.board-part-1 {
+  transform: rotate(180deg);
+}
+
 .led {
   display: inline-block;
-  width: calc((100% / 64) - 0.4rem);
-  height: calc((100% / 64) - 0.4rem);
-  margin: calc((100% / 128) + 0.2rem);
+  width: 0.7rem;
+  height: 0.7rem;
+  margin: calc((100% / 64) - 0.35rem); /* 0.35rem is 0.7rem / 2 */
 
   box-sizing: border-box;
   border: 0.1rem solid transparent;
@@ -51,4 +55,3 @@
   line-height: 0;
   opacity: 0.1;
 }
-
