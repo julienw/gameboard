@@ -35,17 +35,21 @@
 
   const pixelSize = Hardware.Constants.PixelSize;
 
-  const boardWidth = HardwareProxy.Constants.Width;
-  const boardWidthInPixels = HardwareProxy.Constants.Width * pixelSize;
+  const physicalWidth = HardwareProxy.Constants.Width;
+  const physicalWidthInPixels = HardwareProxy.Constants.Width * pixelSize;
+  const physicalHeight = HardwareProxy.Constants.Height;
 
-  const boardHeight = HardwareProxy.Constants.Height;
+  const boardWidth = 32;
+  const boardWidthInPixels = boardWidth * pixelSize;
+  const boardHeight = 32;
+
   const boardOffset = {
     left: 1,
-    bottom: 1 * HardwareProxy.Constants.Width,
+    bottom: 1 * boardWidth,
     right: 1,
-    top: 1 * HardwareProxy.Constants.Width,
+    top: 1 * boardHeight
   };
-  
+
 
   function updateLedById(buffer, id, color) {
     buffer[id * pixelSize + 0] = color.r;

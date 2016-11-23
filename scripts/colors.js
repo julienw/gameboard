@@ -8,7 +8,7 @@
   }
 
   const Colors = {
-    white:  new Color(10, 10, 10),
+    white:  new Color(255, 255, 255),
     black:  new Color(0, 0, 0),
     red:    new Color(255, 0, 0),
     blue:   new Color(0, 0, 255),

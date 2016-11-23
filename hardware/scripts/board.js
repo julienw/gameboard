@@ -1,35 +1,53 @@
 'use strict';
 
-function createElement(id, className) {
-  let element = document.createElement('div');
-  element.id = id;
-  element.className = className;
-  return element;
-}
-
-function buildBoard() {
-  let board = createElement('board', 'board');
-
-  for (let i = 0; i < 1024; i++) {
-    let led = createElement('led_' + i, 'led');
-    board.appendChild(led);
+{
+  const { Hardware } = require('./hardware');
+  function createElement(id, className) {
+    let element = document.createElement('div');
+    if (id) {
+      element.id = id;
+    }
+    element.className = className;
+    return element;
   }
 
-  document.body.appendChild(board);
-}
+  function buildBoard() {
+    let board = createElement('board', 'board');
+    const ledCount = Hardware.Constants.Width * Hardware.Constants.Height;
+    const boardCount = Hardware.Constants.BoardCount;
+    const ledCountByBoard = ledCount / boardCount;
 
-function buildVirtualBoard() {
-  let virtual = createElement('virtual', 'virtual');
+    let boardPart;
+    let boardCounter = 0;
 
-  let content = createElement('content', 'content');
-  for (let i = 0; i < 100; i++) {
-    let c = createElement('case_' + i, 'case');
-    content.appendChild(c);
+    for (let i = 0; i < ledCount; i++) {
+      if (i % ledCountByBoard === 0) {
+        boardPart =
+          createElement(null, `board-part board-part-${boardCounter}`);
+        board.appendChild(boardPart);
+        boardCounter++;
+      }
+      let led = createElement('led_' + i, 'led');
+      boardPart.appendChild(led);
+    }
+
+    document.body.appendChild(board);
   }
 
-  board.appendChild(content);
-  document.body.appendChild(virtual);
-}
+  function buildVirtualBoard() {
+    let virtual = createElement('virtual', 'virtual');
 
-buildBoard();
-buildVirtualBoard();
+    let content = createElement('content', 'content');
+    for (let i = 0; i < 100; i++) {
+      let c = createElement('case_' + i, 'case');
+      content.appendChild(c);
+    }
+
+    virtual.appendChild(content);
+    document.body.appendChild(virtual);
+  }
+
+  buildBoard();
+  // not sure what it's for
+  // buildVirtualBoard();
+}

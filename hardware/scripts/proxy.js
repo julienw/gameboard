@@ -1,3 +1,5 @@
+// This files converts the data between the game layout and the
+// physical/emulated board handled by Hardware.
 
 (function() {
 
@@ -8,7 +10,7 @@ const HardwareProxy = (function HardwareProxy() {
 
   const Constants = {
     Width: 32,
-    Height: 32,
+    Height: 48,
   };
 
   function size() {
@@ -19,17 +21,24 @@ const HardwareProxy = (function HardwareProxy() {
 
   function assert(value, msg) {
     if (!value) {
-      throw new Error(msg);;
+      throw new Error(msg);
+    }
+  }
+
+  function* splitTypedArray(buffer, count) {
+    for (let i = 0; i < buffer.length; i += count) {
+      yield buffer.subarray(i, i + count);
     }
   }
 
   function applyProtocol(inBuffer) {
     'use strict';
 
-    let outBuffer = new Uint8Array(
-      Hardware.Constants.HeaderSize +
-      (Hardware.Constants.Width * Hardware.Constants.Height * Hardware.Constants.PixelSize) +
-      Hardware.Constants.FooterSize
+    const { Width, Height, HeaderSize, FooterSize, PixelSize } = Hardware.Constants;
+    const outBuffer = new Uint8Array(
+      HeaderSize +
+      (Width * Height * PixelSize) +
+      FooterSize
     );
 
     // Write Header
@@ -41,33 +50,28 @@ const HardwareProxy = (function HardwareProxy() {
 
     // Write Content
     //
-    // Our mcu firmware is a little stupid. It assumes the board size is 64x32,
-    // but our board size is 32x32.
-    // To make the embedders works easier, our HardwareProxy expect buffer sized
-    // for a 32x32 board - which means those buffers needs to be converted to
-    // the format expected by the mcu firmware.
-    // All this happens at the cost of performance. It should be fine for now but
-    // if we continue to prototype with this board and expect 60 fps it will be 
-    // definitively better to have a new firmware.
+    // Our firmware assume we have 3 16x32 chained boards handled as a unique
+    // 16x96 board.
+    // Additionally the 2nd board is rotated.
     //
-    let step = Constants.Width * Hardware.Constants.PixelSize;
-    for (let i = 0; i < inBuffer.length; i+=step) {
-      let iteration = i / step * 2;
+    // The logic here is converting the coordinates from 32x48 to 16x96.
+    //
+    // All this happens at the cost of performance. It should be fine for now
+    // but if we continue to prototype with this board and expect 60 fps it
+    // will be definitively better to have a new firmware.
 
-      for (let j = 0; j < step; j++) {
-        let outIndex = Hardware.Constants.HeaderSize + (iteration * step) + j;
-        outBuffer[outIndex] = 0x00;
-      }
-
-      for (let j = step; j < (step * 2); j+=Hardware.Constants.PixelSize) {
-        let outIndex = Hardware.Constants.HeaderSize + (iteration * step) + j;
-        let inIndex = i + (j - step);
-
-        outBuffer[outIndex + 0] = inBuffer[inIndex + 0];
-        outBuffer[outIndex + 1] = inBuffer[inIndex + 1];
-        outBuffer[outIndex + 2] = inBuffer[inIndex + 2];
-      }
+    // 512 is how many leds we have in 1 board.
+    const step = 512 * PixelSize;
+    outBuffer.set(inBuffer.subarray(0, step), HeaderSize);
+    const pixelsInMiddleBoard =
+      splitTypedArray(inBuffer.subarray(step, step * 2), 3);
+    let pixelsCount = 0;
+    for (const pixel of pixelsInMiddleBoard) {
+      pixelsCount += PixelSize;
+      const where = HeaderSize + step * 2 - pixelsCount;
+      outBuffer.set(pixel, where);
     }
+    outBuffer.set(inBuffer.subarray(step * 2, step * 3), HeaderSize + step * 2);
 
     return outBuffer;
   }
