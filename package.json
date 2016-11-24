@@ -13,5 +13,8 @@
     "nodejs-websocket": "^1.7.0",
     "pinio": "0.0.3",
     "ws": "^1.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.10.2"
   }
 }

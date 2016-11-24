@@ -68,7 +68,7 @@
     }
   }
 
-  function updateBufferColumnRange(buffer, index, begin , end, color) {
+  function updateBufferColumnRange(buffer, index, begin, end, color) {
     begin = (index * pixelSize) + (begin * boardWidthInPixels);
     end = end * boardWidthInPixels;
 
@@ -132,7 +132,7 @@
           updateBufferColumnRange(buffer, boardWidth - 1, begin, end, color);
           break;
         }
-      } 
+      }
     }
   }
 
